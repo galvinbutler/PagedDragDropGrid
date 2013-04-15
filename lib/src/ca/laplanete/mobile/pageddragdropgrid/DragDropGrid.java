@@ -34,12 +34,9 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.SparseArray;
-import android.util.TypedValue;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
@@ -81,8 +78,6 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 
 	private int lastTouchX;
 	private int lastTouchY;
-	private int gridHeight;
-	private DeleteDropZoneView deleteZone;
 	private ScrollView container;
 
 	public DragDropGrid(Context context) {
@@ -97,7 +92,6 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 	private void init() {
 		setOnTouchListener(this);
 		setOnLongClickListener(this);
-		createDeleteZone();
 	}
 	
 	public void setContainer(ScrollView container) {
@@ -118,7 +112,6 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 		for (int item = 0; item < adapter.getItemCount(); item++) {
 			addView(adapter.getView(item));
 		}
-		deleteZone.bringToFront();
 	}
 
 	private void animateMoveAllItems() {
@@ -171,7 +164,6 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
             }
 	    } else {
     		manageChildrenReordering();
-    		hideDeleteView();
 
     		movingView = false;
     		dragged = -1;
@@ -194,41 +186,9 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 	}
 
 	private void manageChildrenReordering() {
-		boolean draggedDeleted = touchUpInDeleteZoneDrop(lastTouchX, lastTouchY);
-
-		if (draggedDeleted) {
-			animateDeleteDragged();
-			reorderChildrenWhenDraggedIsDeleted();
-		} else {
-			reorderChildren();
-		}
+		reorderChildren();
 	}
 
-	private void animateDeleteDragged() {
-		ScaleAnimation scale = new ScaleAnimation(1.4f, 0f, 1.4f, 0f, biggestChildWidth / 2 , biggestChildHeight / 2);
-		scale.setDuration(200);
-		scale.setFillAfter(true);
-		scale.setFillEnabled(true);
-
-		getChildAt(dragged).clearAnimation();
-		getChildAt(dragged).startAnimation(scale);
-	}
-
-	private void reorderChildrenWhenDraggedIsDeleted() {
-		Integer newDraggedPosition = newPositions.get(dragged,dragged);
-
-		List<View> children = cleanUnorderedChildren();
-		addReorderedChildrenToParent(children);
-
-		tellAdapterDraggedIsDeleted(newDraggedPosition);
-		removeViewAt(newDraggedPosition);
-
-		requestLayout();
-	}
-
-	private void tellAdapterDraggedIsDeleted(Integer newDraggedPosition) {
-		adapter.deleteItem(newDraggedPosition);
-	}
 
 	private void touchDown(MotionEvent event) {
 		initialX = (int)event.getRawX();
@@ -245,23 +205,7 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 
 			moveDraggedView(lastTouchX, lastTouchY);
 			manageSwapPosition(lastTouchX, lastTouchY);
-			manageDeleteZoneHover(lastTouchX, lastTouchY);
 		}
-	}
-
-	private void manageDeleteZoneHover(int x, int y) {
-		Rect zone = new Rect();
-		deleteZone.getHitRect(zone);
-
-		if (zone.intersect(x, y, x+1, y+1)) {
-			deleteZone.highlight();
-		} else {
-			deleteZone.smother();
-		}
-	}
-
-	private boolean touchUpInDeleteZoneDrop(int x, int y) {
-		return false;
 	}
 
 	private void moveDraggedView(int x, int y) {
@@ -464,8 +408,6 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 			if (view != null)
 				addView(view);
 		}
-
-		deleteZone.bringToFront();
 	}
 
 	private List<View> saveChildren() {
@@ -515,15 +457,9 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 		computeGridMatrixSize(widthSize, heightSize);
 		computeColumnsAndRowsSizes(widthSize, heightSize);
 
-		measureChild(deleteZone, MeasureSpec.makeMeasureSpec(gridWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec((int)getPixelFromDip(40), MeasureSpec.EXACTLY));
+		// measureChild(deleteZone, MeasureSpec.makeMeasureSpec(gridWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec((int)getPixelFromDip(40), MeasureSpec.EXACTLY));
 
 		setMeasuredDimension(widthSize, heightSize);
-	}
-
-	private float getPixelFromDip(int size) {
-		Resources r = getResources();
-		float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, size, r.getDisplayMetrics());
-		return px;
 	}
 
 	private void computeColumnsAndRowsSizes(int widthSize, int heightSize) {
@@ -568,8 +504,7 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 	}
 
 	private int getItemViewCount() {
-		// -1 to remove the DeleteZone from the loop
-		return getChildCount()-1;
+		return getChildCount();
 	}
 
 	private void adaptChildrenMeasuresToViewSize(int widthSize, int heightSize) {
@@ -586,7 +521,6 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 		if (heightMode == MeasureSpec.UNSPECIFIED) {
 			heightSize = display.getHeight();
 		}
-		gridHeight = heightSize;
 		return heightSize;
 	}
 
@@ -656,7 +590,6 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
     		animateMoveAllItems();
     
     		animateDragged();
-    		popDeleteView();
     
     		return true;
 	    }
@@ -679,25 +612,6 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 
 	private boolean aViewIsDragged() {
 		return dragged != -1;
-	}
-
-	private void popDeleteView() {
-
-		deleteZone.setVisibility(View.GONE);
-
-		int l = deleteZone.getMeasuredWidth();
-		int t = gridHeight - deleteZone.getMeasuredHeight();
-		deleteZone.layout(l,  t, l + gridWidth, t + gridHeight);
-	}
-
-	private void createDeleteZone() {
-		deleteZone = new DeleteDropZoneView(getContext());
-		deleteZone.setVisibility(View.GONE);
-		addView(deleteZone);
-	}
-
-	private void hideDeleteView() {
-		deleteZone.setVisibility(View.GONE);
 	}
 
 	private int positionForView(View v) {
