@@ -107,8 +107,8 @@ public class PagedDragDropGrid extends HorizontalScrollView implements PagedCont
     
     public void setAdapter(PagedDragDropGridAdapter adapter) {
     	this.adapter = adapter;
-		grid.setAdapter(adapter);
-		grid.setContainer(this);
+		// grid.setAdapter(adapter);
+		// grid.setContainer(this);
 	}
     
     public void setClickListener(OnClickListener l) {
@@ -123,8 +123,8 @@ public class PagedDragDropGrid extends HorizontalScrollView implements PagedCont
     public void notifyDataSetChanged() {
         removeAllViews();
         initGrid();
-        grid.setAdapter(adapter);
-        grid.setContainer(this);
+        // grid.setAdapter(adapter);
+        // grid.setContainer(this);
         grid.setOnClickListener(listener);
     }
 

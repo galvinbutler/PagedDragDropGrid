@@ -31,45 +31,30 @@ package ca.laplanete.mobile.example;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ScrollView;
 import android.widget.Toast;
-
-import ca.laplanete.mobile.pageddragdropgrid.PagedDragDropGrid;
+import ca.laplanete.mobile.pageddragdropgrid.DragDropGrid;
 
 public class ExampleActivity extends Activity implements OnClickListener {
     
-    private PagedDragDropGrid gridview;
+    private DragDropGrid gridview;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.example);
-		gridview = (PagedDragDropGrid) findViewById(R.id.gridview);		
-		gridview.setAdapter(new ExamplePagedDragDropGridAdapter(this, gridview));
-		gridview.setClickListener(this);
+		gridview = (DragDropGrid) findViewById(R.id.gridview);
+		
+		ScrollView container = (ScrollView) findViewById(R.id.container);
+		
+		gridview.setContainer(container);
+		gridview.setAdapter(new ExampleDragDropGridAdapter(this, gridview));
 		
 		gridview.setBackgroundColor(Color.LTGRAY);
 	}
-	
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add("Reset").setOnMenuItemClickListener(new OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                gridview.setAdapter(new ExamplePagedDragDropGridAdapter(ExampleActivity.this, gridview));
-                gridview.notifyDataSetChanged();
-                
-                return true;
-            }
-        });
-
-        return true;
-    }
 
     @Override
     public void onClick(View v) {

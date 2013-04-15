@@ -42,42 +42,20 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import ca.laplanete.mobile.pageddragdropgrid.PagedDragDropGrid;
-import ca.laplanete.mobile.pageddragdropgrid.PagedDragDropGridAdapter;
+import ca.laplanete.mobile.pageddragdropgrid.DragDropGrid;
+import ca.laplanete.mobile.pageddragdropgrid.DragDropGridAdapter;
 
-public class ExamplePagedDragDropGridAdapter implements PagedDragDropGridAdapter {
+public class ExampleDragDropGridAdapter implements DragDropGridAdapter {
 
 	private Context context;
-	private PagedDragDropGrid gridview;
+	private DragDropGrid gridview;
+	private List<Item> items = new ArrayList<Item>();
 	
-	List<Page> pages = new ArrayList<Page>();
-	
-	public ExamplePagedDragDropGridAdapter(Context context, PagedDragDropGrid gridview) {
+	public ExampleDragDropGridAdapter(Context context, DragDropGrid gridview) {
 		super();
 		this.context = context;
 		this.gridview = gridview;
 		
-		Page page1 = new Page();
-		List<Item> items = new ArrayList<Item>();
-		items.add(new Item(1, "Item 1", R.drawable.ic_launcher));
-		items.add(new Item(2, "Item 2", R.drawable.ic_launcher));
-		items.add(new Item(3, "Item 3", R.drawable.ic_launcher));
-		page1.setItems(items);
-		pages.add(page1);
-		
-		Page page2 = new Page();
-		items = new ArrayList<Item>();
-		items.add(new Item(4, "Item 4", R.drawable.ic_launcher));
-		items.add(new Item(5, "Item 5", R.drawable.ic_launcher));
-		items.add(new Item(6, "Item 6", R.drawable.ic_launcher));
-		items.add(new Item(7, "Item 7", R.drawable.ic_launcher));
-		items.add(new Item(8, "Item 8", R.drawable.ic_launcher));
-		items.add(new Item(9, "Item 9", R.drawable.ic_launcher));
-		page2.setItems(items);
-		pages.add(page2);
-		
-		Page page3 = new Page();
-		items = new ArrayList<Item>();
 		items.add(new Item(10, "Item 10", R.drawable.ic_launcher));
 		items.add(new Item(11, "Item 11", R.drawable.ic_launcher));
 		items.add(new Item(12, "Item 12",R.drawable.ic_launcher));
@@ -114,30 +92,31 @@ public class ExamplePagedDragDropGridAdapter implements PagedDragDropGridAdapter
 		items.add(new Item(43, "Item 43",R.drawable.ic_launcher));
 		items.add(new Item(44, "Item 44",R.drawable.ic_launcher));
 		items.add(new Item(45, "Item 45",R.drawable.ic_launcher));
-		page3.setItems(items);
-		pages.add(page3);
+		items.add(new Item(46, "Item 46",R.drawable.ic_launcher));
+		items.add(new Item(47, "Item 47",R.drawable.ic_launcher));
+		items.add(new Item(48, "Item 48",R.drawable.ic_launcher));
+		items.add(new Item(49, "Item 49",R.drawable.ic_launcher));
+		items.add(new Item(50, "Item 50",R.drawable.ic_launcher));
+		items.add(new Item(51, "Item 51",R.drawable.ic_launcher));
+		items.add(new Item(52, "Item 52",R.drawable.ic_launcher));
+		items.add(new Item(53, "Item 53",R.drawable.ic_launcher));
+		items.add(new Item(54, "Item 54",R.drawable.ic_launcher));
+		items.add(new Item(55, "Item 55",R.drawable.ic_launcher));
+		items.add(new Item(56, "Item 56",R.drawable.ic_launcher));
+		items.add(new Item(57, "Item 57",R.drawable.ic_launcher));
+		items.add(new Item(58, "Item 58",R.drawable.ic_launcher));
+		items.add(new Item(59, "Item 59",R.drawable.ic_launcher));
+		items.add(new Item(60, "Item 60",R.drawable.ic_launcher));
 	}
 
 	@Override
-	public int pageCount() {
-		return pages.size();
-	}
-
-	private List<Item> itemsInPage(int page) {
-		if (pages.size() > page) {
-			return pages.get(page).getItems();
-		}	
-		return Collections.emptyList();
-	}
-
-	@Override
-	public View getView(int page, int index) {
+	public View getView(int index) {
 		
 		LinearLayout layout = new LinearLayout(context);
 		layout.setOrientation(LinearLayout.VERTICAL);
 		
 		ImageView icon = new ImageView(context);
-		Item item = getItem(page, index);
+		Item item = items.get(index);
 		icon.setImageResource(item.getDrawable());
 		icon.setPadding(15, 15, 15, 15);
 		
@@ -152,90 +131,48 @@ public class ExamplePagedDragDropGridAdapter implements PagedDragDropGridAdapter
 
 		layout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 		
-		// only set selector on every other page for demo purposes
-		// if you do not wish to use the selector functionality, simply disregard this code
-		if(page % 2 == 0) {
-    		layout.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.list_selector_holo_light));
-    		layout.setClickable(true);
-    		layout.setOnLongClickListener(new OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    return gridview.onLongClick(v);
-                }
-    		});
-		}
+		layout.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+				return gridview.onLongClick(v);
+			}
+		});
 
 		layout.addView(label);
 		return layout;
 	}
 
-	private Item getItem(int page, int index) {
-		List<Item> items = itemsInPage(page);
-		return items.get(index);
-	}
-
 	@Override
-	public int rowCount() {
+	public int getRowCount() {
 		return AUTOMATIC;
 	}
 
 	@Override
-	public int columnCount() {
+	public int getColumnCount() {
 		return AUTOMATIC;
 	}
 
 	@Override
-	public int itemCountInPage(int page) {
-		return itemsInPage(page).size();
+	public int getItemCount() {
+		return items.size();
 	}
 
+	@Override
+	public void swapItems(int index1, int index2) {
+		Collections.swap(items, index1, index2);
+	}
+
+	@Override
+	public void deleteItem(int itemIndex) {
+		deleteItem(itemIndex);
+	}
+
+	@Override
 	public void printLayout() {
-		int i=0;
-		for (Page page : pages) {
-			Log.d("Page", Integer.toString(i++));
-			
-			for (Item item : page.getItems()) {
-				Log.d("Item", Long.toString(item.getId()));
-			}
+		for (Item item : items) {
+			Log.d("Item ", Long.toString(item.getId()));
 		}
-	}
-
-	private Page getPage(int pageIndex) {
-		return pages.get(pageIndex);
-	}
-
-	@Override
-	public void swapItems(int pageIndex, int itemIndexA, int itemIndexB) {
-		getPage(pageIndex).swapItems(itemIndexA, itemIndexB);
-	}
-
-	@Override
-	public void moveItemToPreviousPage(int pageIndex, int itemIndex) {
-		int leftPageIndex = pageIndex-1;
-		if (leftPageIndex >= 0) {
-			Page startpage = getPage(pageIndex);
-			Page landingPage = getPage(leftPageIndex);
-			
-			Item item = startpage.removeItem(itemIndex);
-			landingPage.addItem(item);	
-		}	
-	}
-
-	@Override
-	public void moveItemToNextPage(int pageIndex, int itemIndex) {
-		int rightPageIndex = pageIndex+1;
-		if (rightPageIndex < pageCount()) {
-			Page startpage = getPage(pageIndex);
-			Page landingPage = getPage(rightPageIndex);
-			
-			Item item = startpage.removeItem(itemIndex);
-			landingPage.addItem(item);			
-		}	
-	}
-
-	@Override
-	public void deleteItem(int pageIndex, int itemIndex) {
-		getPage(pageIndex).deleteItem(itemIndex);
 	}
 	
 }

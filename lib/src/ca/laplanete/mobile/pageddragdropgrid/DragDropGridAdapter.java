@@ -26,39 +26,61 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ca.laplanete.mobile.example;
+package ca.laplanete.mobile.pageddragdropgrid;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import android.view.View;
 
-public class Page {
+public interface DragDropGridAdapter {
 
-	private List<Item> items = new ArrayList<Item>();
+	public final static int AUTOMATIC = -1;
 
-	public List<Item> getItems() {
-		return items;
-	}
-
-	public void setItems(List<Item> items) {
-		this.items = items;
-	}
+	/**
+	 * Returns the item count
+	 * 
+	 * @return item count for page
+	 */
+	public int getItemCount();
 	
-	public void addItem(Item item) {
-		items.add(item);
-	}
+	/**
+	 * Returns the view for an item
+	 * 
+	 * @param item index
+	 * @return the view 
+	 */
+	public View getView(int index);
 	
-	public void swapItems(int itemA, int itemB) {
-		Collections.swap(items, itemA, itemB);
-	}
+	/**
+	 * The fixed row count (AUTOMATIC for automatic computing)
+	 * 
+	 * @return row count or AUTOMATIC
+	 */
+	public int getRowCount();
+	
+	/**
+	 * The fixed column count (AUTOMATIC for automatic computing)
+	 * 
+	 * @return column count or AUTOMATIC
+	 */
+	public int getColumnCount();
 
-	public Item removeItem(int itemIndex) {
-		Item item = items.get(itemIndex);
-		items.remove(itemIndex);
-		return item;
-	}
+	/**
+	 * Prints the layout in Log.d();
+	 */
+	public void printLayout();
 
-	public void deleteItem(int itemIndex) {
-		items.remove(itemIndex);
-	}
+	/**
+	 * Swaps two items in he item list
+	 * 
+	 * @param itemIndexA
+	 * @param itemIndexB
+	 */
+	public void swapItems(int index1, int index2);
+
+	
+	/**
+	 * deletes the item
+	 * 
+	 * @param itemIndex
+	 */
+	public void deleteItem( int itemIndex);
 }
