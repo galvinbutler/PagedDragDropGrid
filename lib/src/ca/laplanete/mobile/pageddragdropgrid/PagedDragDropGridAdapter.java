@@ -55,7 +55,7 @@ public interface PagedDragDropGridAdapter {
 	 * @param item index
 	 * @return the view 
 	 */
-	public View view(int page, int index);
+	public View getView(int page, int index);
 	
 	/**
 	 * The fixed row count (AUTOMATIC for automatic computing)

@@ -142,7 +142,7 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 	private void addChildViews() {
 		for (int page = 0; page < adapter.pageCount(); page++) {
 			for (int item = 0; item < adapter.itemCountInPage(page); item++) {
-				addView(adapter.view(page, item));
+				addView(adapter.getView(page, item));
 			}
 		}
 		deleteZone.bringToFront();
@@ -279,13 +279,6 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 	}
 
 	private boolean touchUpInDeleteZoneDrop(int x, int y) {
-		Rect zone = new Rect();
-		deleteZone.getHitRect(zone);
-
-		if (zone.intersect(x, y, x+1, y+1)) {
-			deleteZone.smother();
-			return true;
-		}
 		return false;
 	}
 
@@ -569,12 +562,14 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 	}
 
 	private Animation createFastRotateAnimation() {
-		Animation rotate = new RotateAnimation(-2.0f,
-										  2.0f,
-										  Animation.RELATIVE_TO_SELF,
-										  0.5f,
-										  Animation.RELATIVE_TO_SELF,
-										  0.5f);
+		Animation rotate = new RotateAnimation(
+			0.0f,
+			0.0f,
+			Animation.RELATIVE_TO_SELF,
+			0.5f,
+			Animation.RELATIVE_TO_SELF,
+			0.5f
+		);
 
 	 	rotate.setRepeatMode(Animation.REVERSE);
         rotate.setRepeatCount(Animation.INFINITE);
@@ -892,7 +887,7 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 
 	private void popDeleteView() {
 
-		deleteZone.setVisibility(View.VISIBLE);
+		deleteZone.setVisibility(View.GONE);
 
 		int l = currentPage() * deleteZone.getMeasuredWidth();
 		int t = gridPageHeight - deleteZone.getMeasuredHeight();
@@ -901,6 +896,7 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 
 	private void createDeleteZone() {
 		deleteZone = new DeleteDropZoneView(getContext());
+		deleteZone.setVisibility(View.GONE);
 		addView(deleteZone);
 	}
 
