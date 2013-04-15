@@ -26,33 +26,48 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ca.laplanete.mobile.example;
+package ca.laplanete.mobile.pageddragdropgrid;
 
-public class Item {
+public class DragDropItem {
 
 	private long id;
 	private String name;
 	private int drawable;
-	
+	private boolean isMoveable = true;
+
 	public long getId() {
 		return id;
 	}
+
 	public void setId(long id) {
 		this.id = id;
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	public int getDrawable() {
 		return drawable;
 	}
+
 	public void setDrawable(int drawable) {
 		this.drawable = drawable;
 	}
-	public Item(long id, String name, int drawable) {
+	
+	public boolean isMoveable() {
+		return isMoveable;
+	}
+	
+	public void setIsMoveable(boolean isMoveable) {
+		this.isMoveable = isMoveable;
+	}
+
+	public DragDropItem(long id, String name, int drawable) {
 		super();
 		this.id = id;
 		this.name = name;

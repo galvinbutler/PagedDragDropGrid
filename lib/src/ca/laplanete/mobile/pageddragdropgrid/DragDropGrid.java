@@ -36,14 +36,13 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Point;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -53,6 +52,8 @@ import android.view.animation.TranslateAnimation;
 import android.widget.ScrollView;
 
 public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongClickListener {
+	
+	private static final String TAG = "DragDropGrid";
 
 	private static int ANIMATION_DURATION = 250;
 	private static int EGDE_DETECTION_MARGIN = 35;
@@ -221,6 +222,12 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 
 	private void manageSwapPosition(int x, int y) {
 		int target = getTargetAtCoor(x, y);
+		
+		DragDropItem item = adapter.getItem(target);
+		if (!item.isMoveable()) {
+			return;
+		}
+		
 		if (childHasMoved(target) && target != lastTarget) {
 			animateGap(target);
 			lastTarget = target;
@@ -440,24 +447,28 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 		int widthSize = MeasureSpec.getSize(widthMeasureSpec);
 		int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-		WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-
-		Display display = wm.getDefaultDisplay();
-
-		widthSize = acknowledgeWidthSize(widthMode, widthSize, display);
-		heightSize = acknowledgeHeightSize(heightMode, heightSize, display);
+		gridWidth = widthSize;
+		searchBiggestChildMeasures();
+		if (adapter.getRowCount() != DragDropGridAdapter.AUTOMATIC) {
+			heightSize = biggestChildHeight * adapter.getRowCount();
+		} else {
+			int itemsPerRow = (int) Math.floor((float) gridWidth /  biggestChildWidth);
+			int count = adapter.getItemCount();
+			int rows = (int) Math.ceil((float) count / itemsPerRow);
+			
+			if (rows == 0) {
+				heightSize = biggestChildHeight;
+			} else {
+				heightSize = biggestChildHeight * rows;
+			}
+		}
 
 		adaptChildrenMeasuresToViewSize(widthSize, heightSize);
-		searchBiggestChildMeasures();
 		computeGridMatrixSize(widthSize, heightSize);
 		computeColumnsAndRowsSizes(widthSize, heightSize);
-
-		// measureChild(deleteZone, MeasureSpec.makeMeasureSpec(gridWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec((int)getPixelFromDip(40), MeasureSpec.EXACTLY));
 
 		setMeasuredDimension(widthSize, heightSize);
 	}
@@ -517,21 +528,6 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 		}
 	}
 
-	private int acknowledgeHeightSize(int heightMode, int heightSize, Display display) {
-		if (heightMode == MeasureSpec.UNSPECIFIED) {
-			heightSize = display.getHeight();
-		}
-		return heightSize;
-	}
-
-	private int acknowledgeWidthSize(int widthMode, int widthSize, Display display) {
-		if (widthMode == MeasureSpec.UNSPECIFIED) {
-			widthSize = display.getWidth();
-		}
-		gridWidth = widthSize;
-		return widthSize;
-	}
-
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		int width = (l + r);
@@ -580,21 +576,28 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 	}
 
 	@Override
-	public boolean onLongClick(View v) {	    
-	    if(positionForView(v) != -1) {
+	public boolean onLongClick(View v) {
+		try {
+			Integer index = (Integer) v.getTag();
+			
+			if (!adapter.getItem(index).isMoveable()) {
+				return false;
+			}
+			
 	    	disableScroll();
 	    	
-    		movingView = true;
-    		dragged = positionForView(v);
-    
-    		animateMoveAllItems();
-    
-    		animateDragged();
-    
-    		return true;
-	    }
-	    
-	    return false;
+			movingView = true;
+			dragged = index;
+	
+			animateMoveAllItems();
+	
+			animateDragged();
+	
+			return true;
+		} catch (ClassCastException e) {
+			Log.e(TAG, "View in DragDropGrid did not have index in tag.");
+		}
+		return false;
 	}
 
 	private void animateDragged() {
@@ -612,33 +615,6 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 
 	private boolean aViewIsDragged() {
 		return dragged != -1;
-	}
-
-	private int positionForView(View v) {
-		for (int index = 0; index < getItemViewCount(); index++) {
-			View child = getChildAt(index);
-				if (isPointInsideView(initialX, initialY, child)) {
-					return index;
-				}
-		}
-		return -1;
-	}
-
-	private boolean isPointInsideView(float x, float y, View view) {
-		int location[] = new int[2];
-		view.getLocationOnScreen(location);
-		int viewX = location[0];
-		int viewY = location[1];
-
-		if (pointIsInsideViewBounds(x, y, view, viewX, viewY)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private boolean pointIsInsideViewBounds(float x, float y, View view, int viewX, int viewY) {
-		return (x > viewX && x < (viewX + view.getWidth())) && (y > viewY && y < (viewY + view.getHeight()));
 	}
 
 	private void tellAdapterToSwapDraggedWithTarget(int dragged, int target) {

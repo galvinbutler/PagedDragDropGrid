@@ -40,6 +40,13 @@ public interface DragDropGridAdapter {
 	 * @return item count for page
 	 */
 	public int getItemCount();
+
+	/**
+	 * Returns the item at the specified index
+	 * 
+	 * @return item count for page
+	 */
+	public DragDropItem getItem(int index);
 	
 	/**
 	 * Returns the view for an item
