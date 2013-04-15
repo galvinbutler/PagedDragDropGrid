@@ -71,23 +71,10 @@ public interface DragDropGridAdapter {
 	public int getColumnCount();
 
 	/**
-	 * Prints the layout in Log.d();
-	 */
-	public void printLayout();
-
-	/**
 	 * Swaps two items in he item list
 	 * 
 	 * @param itemIndexA
 	 * @param itemIndexB
 	 */
 	public void swapItems(int index1, int index2);
-
-	
-	/**
-	 * deletes the item
-	 * 
-	 * @param itemIndex
-	 */
-	public void deleteItem( int itemIndex);
 }

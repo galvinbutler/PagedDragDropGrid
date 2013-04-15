@@ -34,7 +34,6 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnLongClickListener;
@@ -171,18 +170,6 @@ public class ExampleDragDropGridAdapter implements DragDropGridAdapter {
 	@Override
 	public void swapItems(int index1, int index2) {
 		Collections.swap(items, index1, index2);
-	}
-
-	@Override
-	public void deleteItem(int itemIndex) {
-		deleteItem(itemIndex);
-	}
-
-	@Override
-	public void printLayout() {
-		for (DragDropItem item : items) {
-			Log.d("Item ", Long.toString(item.getId()));
-		}
 	}
 	
 }
