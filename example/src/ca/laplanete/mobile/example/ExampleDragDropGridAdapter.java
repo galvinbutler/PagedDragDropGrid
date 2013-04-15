@@ -118,7 +118,6 @@ public class ExampleDragDropGridAdapter implements DragDropGridAdapter {
 	public View getView(int index) {
 		
 		LinearLayout layout = new LinearLayout(context);
-		layout.setTag(index);
 		layout.setOrientation(LinearLayout.VERTICAL);
 		
 		ImageView icon = new ImageView(context);

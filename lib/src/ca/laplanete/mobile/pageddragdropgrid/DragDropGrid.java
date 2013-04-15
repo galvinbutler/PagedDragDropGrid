@@ -223,7 +223,14 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 	private void manageSwapPosition(int x, int y) {
 		int target = getTargetAtCoor(x, y);
 		
-		DragDropItem item = adapter.getItem(target);
+		DragDropItem item;
+		
+		try {
+			item = adapter.getItem(target);
+		} catch (IndexOutOfBoundsException e) {
+			return;
+		}
+		
 		if (!item.isMoveable()) {
 			return;
 		}
@@ -578,22 +585,25 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 	@Override
 	public boolean onLongClick(View v) {
 		try {
-			Integer index = (Integer) v.getTag();
+			int position = positionForView(v);
 			
-			if (!adapter.getItem(index).isMoveable()) {
-				return false;
+			if(positionForView(v) != -1) {
+			
+				if (!adapter.getItem(position).isMoveable()) {
+					return false;
+				}
+				
+		    	disableScroll();
+		    	
+				movingView = true;
+				dragged = position;
+		
+				animateMoveAllItems();
+		
+				animateDragged();
+		
+				return true;
 			}
-			
-	    	disableScroll();
-	    	
-			movingView = true;
-			dragged = index;
-	
-			animateMoveAllItems();
-	
-			animateDragged();
-	
-			return true;
 		} catch (ClassCastException e) {
 			Log.e(TAG, "View in DragDropGrid did not have index in tag.");
 		}
@@ -617,6 +627,33 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 		return dragged != -1;
 	}
 
+	private int positionForView(View v) {
+		for (int index = 0; index < getItemViewCount(); index++) {
+			View child = getChildAt(index);
+				if (isPointInsideView(initialX, initialY, child)) {
+					return index;
+				}
+		}
+		return -1;
+	}
+
+	private boolean isPointInsideView(float x, float y, View view) {
+		int location[] = new int[2];
+		view.getLocationOnScreen(location);
+		int viewX = location[0];
+		int viewY = location[1];
+
+		if (pointIsInsideViewBounds(x, y, view, viewX, viewY)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private boolean pointIsInsideViewBounds(float x, float y, View view, int viewX, int viewY) {
+		return (x > viewX && x < (viewX + view.getWidth())) && (y > viewY && y < (viewY + view.getHeight()));
+	}
+	
 	private void tellAdapterToSwapDraggedWithTarget(int dragged, int target) {
 		adapter.swapItems(dragged, target);
 	}
