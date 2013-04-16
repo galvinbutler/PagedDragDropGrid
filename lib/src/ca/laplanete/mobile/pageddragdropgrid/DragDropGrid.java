@@ -87,10 +87,6 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 
 	public DragDropGrid(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		init();
-	}
-
-	private void init() {
 		setOnTouchListener(this);
 		setOnLongClickListener(this);
 	}
@@ -192,11 +188,11 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 
 
 	private void touchDown(MotionEvent event) {
-		initialX = (int)event.getRawX();
-		initialY = (int)event.getRawY();
+		initialX = (int) event.getRawX();
+		initialY = (int) event.getRawY();
 
-		lastTouchX = (int)event.getRawX() + (gridWidth);
-		lastTouchY = (int)event.getRawY();
+		lastTouchX = (int) event.getRawX() + (gridWidth);
+		lastTouchY = (int) event.getRawY();
 	}
 
 	private void touchMove(MotionEvent event) {
