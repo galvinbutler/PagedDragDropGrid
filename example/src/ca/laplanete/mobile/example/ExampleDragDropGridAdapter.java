@@ -42,7 +42,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import ca.laplanete.mobile.pageddragdropgrid.DragDropGrid;
-import ca.laplanete.mobile.pageddragdropgrid.DragDropGridAdapter;
+import ca.laplanete.mobile.pageddragdropgrid.DragDropGrid.DragDropGridAdapter;
 import ca.laplanete.mobile.pageddragdropgrid.DragDropItem;
 
 public class ExampleDragDropGridAdapter implements DragDropGridAdapter {

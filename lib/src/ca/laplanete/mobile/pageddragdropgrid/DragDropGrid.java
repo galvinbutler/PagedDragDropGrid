@@ -76,9 +76,12 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 	private int initialY;
 	private boolean movingView;
 	private int lastTarget = -1;
-
+	private float universalLastTouchX;
+	private float universalLastTouchY;
 	private int lastTouchX;
 	private int lastTouchY;
+	private int dragOffsetX;
+	private int dragOffsetY;
 	private ScrollView container;
 
 	public DragDropGrid(Context context) {
@@ -136,6 +139,8 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		int action = event.getAction();
+		universalLastTouchX = event.getRawX();
+		universalLastTouchY = event.getRawY();
 		switch (action & MotionEvent.ACTION_MASK) {
 		case MotionEvent.ACTION_DOWN:
 			touchDown(event);
@@ -210,8 +215,8 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 		int width = childAt.getMeasuredWidth();
 		int height = childAt.getMeasuredHeight();
 
-		int l = x - (1 * width / 2);
-		int t = y - (1 * height / 2);
+		int l = x - (1 * width / 2) - dragOffsetX;
+		int t = y - (1 * height / 2) - dragOffsetY;
 
 		childAt.layout(l, t, l + width, t + height);
 	}
@@ -591,6 +596,13 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 				
 		    	disableScroll();
 		    	
+		    	int[] viewScreenPosition = new int[2];
+				v.getLocationOnScreen(viewScreenPosition);
+				int viewMiddleX = viewScreenPosition[0] + (v.getMeasuredWidth() / 2);
+				int viewMiddleY = viewScreenPosition[1] + (v.getMeasuredHeight() / 2);
+		    	dragOffsetX = (int) universalLastTouchX - viewMiddleX;
+		    	dragOffsetY = (int) universalLastTouchY - viewMiddleY;
+		    	
 				movingView = true;
 				dragged = position;
 		
@@ -652,5 +664,22 @@ public class DragDropGrid extends ViewGroup implements OnTouchListener, OnLongCl
 	
 	private void tellAdapterToSwapDraggedWithTarget(int dragged, int target) {
 		adapter.swapItems(dragged, target);
+	}
+	
+	public interface DragDropGridAdapter {
+
+		public final static int AUTOMATIC = -1;
+
+		public int getItemCount();
+
+		public DragDropItem getItem(int index);
+		
+		public View getView(int index);
+		
+		public int getRowCount();
+		
+		public int getColumnCount();
+
+		public void swapItems(int index1, int index2);
 	}
 }
